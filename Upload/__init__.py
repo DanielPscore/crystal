@@ -3,12 +3,12 @@ from botocore.exceptions import ClientError
 from decouple import config
 
 ###################
-access_key="***"
-secret_key="****"
+access_key="AKIAUATJLZ6TPTG35KFW"
+secret_key="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"
 warehouse="s3a://parallelscore-staging/delta/videolake"
 uploads="sonalysis-asset"
-api_key="******"
-api_secret="*****"
+api_key="894291272153672"
+api_secret="DNELrIT3lfziYb3u0HQsECDBv1E"
 cloud_name="ogbanugot"
 folder="sonalysis"
 mongo_url="mongodb://sonauser:sona15230@api.sonalysis.io:27017/sonalysis"
@@ -145,7 +145,7 @@ class ProgressPercentage(object):
 
 
 def upload(team1, team2, minimap_video, objd_video,jsy,com,goals):
-    team1_img, team2_img = uploadVideoS3(team1)["object_url"],uploadVideoS3(team2)["object_url"]
+    team1_img, team2_img = uploadVideoS3(team1)["object_url"], uploadVideoS3(team2)["object_url"]
     minimap = uploadVideoS3(minimap_video)["object_url"]
     objd = uploadVideoS3(objd_video)["object_url"]
     js= uploadVideoS3(jsy)["object_url"]

@@ -1,0 +1,151 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: sonalysis-object-detection-
+  annotations: {pipelines.kubeflow.org/kfp_sdk_version: 1.8.12, pipelines.kubeflow.org/pipeline_compilation_time: '2022-06-14T22:11:35.636711',
+    pipelines.kubeflow.org/pipeline_spec: '{"description": "Sonalysis Object Detection",
+      "inputs": [{"name": "image_path"}], "name": "Sonalysis Object Detection"}'}
+  labels: {pipelines.kubeflow.org/kfp_sdk_version: 1.8.12}
+spec:
+  entrypoint: sonalysis-object-detection
+  templates:
+  - name: inf
+    container:
+      args: [--image-path, '{{inputs.parameters.image_path}}', --output-string, /tmp/outputs/output_string/data]
+      command:
+      - sh
+      - -ec
+      - |
+        program_path=$(mktemp)
+        printf "%s" "$0" > "$program_path"
+        python3 -u "$program_path" "$@"
+      - |
+        def _make_parent_dirs_and_return_path(file_path: str):
+            import os
+            os.makedirs(os.path.dirname(file_path), exist_ok=True)
+            return file_path
+
+        def inf(image_path, output_string):
+            import ObjectDetection as objd
+            import cv2
+            # from Communication import *
+            from Upload import upload_simple
+            import YouGet
+            # Download image
+            path = YouGet.download(image_path,"test", objd.config.workin_dir+"/Data", ".jpeg")
+            # read and inference
+            img = cv2.imread(path)
+            r = objd.person(img)
+            inf = objd.plot_many_box(img, r["bb"], label=["person"] * len(r["bb"]))
+            cv2.imwrite("inf.jpeg", inf)
+            url = upload_simple("inf.jpeg")
+
+            # producer.publish_message({"inference":url})
+            # Create Artifact : S3 path to uploded inf
+            with open(output_string, 'w') as writer:
+                writer.write(url)
+
+        import argparse
+        _parser = argparse.ArgumentParser(prog='Inf', description='')
+        _parser.add_argument("--image-path", dest="image_path", type=str, required=True, default=argparse.SUPPRESS)
+        _parser.add_argument("--output-string", dest="output_string", type=_make_parent_dirs_and_return_path, required=True, default=argparse.SUPPRESS)
+        _parsed_args = vars(_parser.parse_args())
+
+        _outputs = inf(**_parsed_args)
+      image: ultralytics/yolov5:latest
+    inputs:
+      parameters:
+      - {name: image_path}
+    outputs:
+      artifacts:
+      - {name: inf-output_string, path: /tmp/outputs/output_string/data}
+    metadata:
+      labels:
+        pipelines.kubeflow.org/kfp_sdk_version: 1.8.12
+        pipelines.kubeflow.org/pipeline-sdk-type: kfp
+        pipelines.kubeflow.org/enable_caching: "true"
+      annotations: {pipelines.kubeflow.org/component_spec: '{"implementation": {"container":
+          {"args": ["--image-path", {"inputValue": "image_path"}, "--output-string",
+          {"outputPath": "output_string"}], "command": ["sh", "-ec", "program_path=$(mktemp)\nprintf
+          \"%s\" \"$0\" > \"$program_path\"\npython3 -u \"$program_path\" \"$@\"\n",
+          "def _make_parent_dirs_and_return_path(file_path: str):\n    import os\n    os.makedirs(os.path.dirname(file_path),
+          exist_ok=True)\n    return file_path\n\ndef inf(image_path, output_string):\n    import
+          ObjectDetection as objd\n    import cv2\n    # from Communication import
+          *\n    from Upload import upload_simple\n    import YouGet\n    # Download
+          image\n    path = YouGet.download(image_path,\"test\", objd.config.workin_dir+\"/Data\",
+          \".jpeg\")\n    # read and inference\n    img = cv2.imread(path)\n    r
+          = objd.person(img)\n    inf = objd.plot_many_box(img, r[\"bb\"], label=[\"person\"]
+          * len(r[\"bb\"]))\n    cv2.imwrite(\"inf.jpeg\", inf)\n    url = upload_simple(\"inf.jpeg\")\n\n    #
+          producer.publish_message({\"inference\":url})\n    # Create Artifact : S3
+          path to uploded inf\n    with open(output_string, ''w'') as writer:\n        writer.write(url)\n\nimport
+          argparse\n_parser = argparse.ArgumentParser(prog=''Inf'', description='''')\n_parser.add_argument(\"--image-path\",
+          dest=\"image_path\", type=str, required=True, default=argparse.SUPPRESS)\n_parser.add_argument(\"--output-string\",
+          dest=\"output_string\", type=_make_parent_dirs_and_return_path, required=True,
+          default=argparse.SUPPRESS)\n_parsed_args = vars(_parser.parse_args())\n\n_outputs
+          = inf(**_parsed_args)\n"], "image": "ultralytics/yolov5:latest"}}, "inputs":
+          [{"name": "image_path", "type": "String"}], "name": "Inf", "outputs": [{"name":
+          "output_string", "type": "String"}]}', pipelines.kubeflow.org/component_ref: '{}',
+        pipelines.kubeflow.org/arguments.parameters: '{"image_path": "{{inputs.parameters.image_path}}"}'}
+  - name: print-url
+    container:
+      args: [--url, /tmp/inputs/url/data]
+      command:
+      - sh
+      - -ec
+      - |
+        program_path=$(mktemp)
+        printf "%s" "$0" > "$program_path"
+        python3 -u "$program_path" "$@"
+      - |
+        def print_url(url):
+
+            #print url
+            with open(url, 'r') as reader:
+                line = reader.readline()
+                print(line)
+
+        import argparse
+        _parser = argparse.ArgumentParser(prog='Print url', description='')
+        _parser.add_argument("--url", dest="url", type=str, required=True, default=argparse.SUPPRESS)
+        _parsed_args = vars(_parser.parse_args())
+
+        _outputs = print_url(**_parsed_args)
+      image: ultralytics/yolov5:latest
+    inputs:
+      artifacts:
+      - {name: inf-output_string, path: /tmp/inputs/url/data}
+    metadata:
+      labels:
+        pipelines.kubeflow.org/kfp_sdk_version: 1.8.12
+        pipelines.kubeflow.org/pipeline-sdk-type: kfp
+        pipelines.kubeflow.org/enable_caching: "true"
+      annotations: {pipelines.kubeflow.org/component_spec: '{"implementation": {"container":
+          {"args": ["--url", {"inputPath": "url"}], "command": ["sh", "-ec", "program_path=$(mktemp)\nprintf
+          \"%s\" \"$0\" > \"$program_path\"\npython3 -u \"$program_path\" \"$@\"\n",
+          "def print_url(url):\n\n    #print url\n    with open(url, ''r'') as reader:\n        line
+          = reader.readline()\n        print(line)\n\nimport argparse\n_parser = argparse.ArgumentParser(prog=''Print
+          url'', description='''')\n_parser.add_argument(\"--url\", dest=\"url\",
+          type=str, required=True, default=argparse.SUPPRESS)\n_parsed_args = vars(_parser.parse_args())\n\n_outputs
+          = print_url(**_parsed_args)\n"], "image": "ultralytics/yolov5:latest"}},
+          "inputs": [{"name": "url", "type": "String"}], "name": "Print url"}', pipelines.kubeflow.org/component_ref: '{}'}
+  - name: sonalysis-object-detection
+    inputs:
+      parameters:
+      - {name: image_path}
+    dag:
+      tasks:
+      - name: inf
+        template: inf
+        arguments:
+          parameters:
+          - {name: image_path, value: '{{inputs.parameters.image_path}}'}
+      - name: print-url
+        template: print-url
+        dependencies: [inf]
+        arguments:
+          artifacts:
+          - {name: inf-output_string, from: '{{tasks.inf.outputs.artifacts.inf-output_string}}'}
+  arguments:
+    parameters:
+    - {name: image_path}
+  serviceAccountName: pipeline-runner

@@ -5,7 +5,6 @@ pwd = pwd[:i+len("crystal")]
 print(pwd)
 class Configurations:
     def __init__(self):
-        self.MONGODB_URI = "*******"
         self.kafkaconsumer = "NewUpload"
         self.kafkaproducer = "Kubeflow"
         self.brokers = ['137.184.147.128:9092']

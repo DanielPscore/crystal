@@ -96,12 +96,9 @@ keras
 tensorflow-gpu
 #tensorflow==2.7
 you-get==0.4.1555
-seaborn
-opencv-python
 h5py
-gpuinfo
 scipy
 consoleprinter
 efficientnet_pytorch
 pyflann-py3
-mediapipe
+

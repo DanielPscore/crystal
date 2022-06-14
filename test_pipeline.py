@@ -1,5 +1,3 @@
-% % writefile. / test_pipeline.py
-
 import kfp
 import kfp.components as comp
 
@@ -36,7 +34,7 @@ def print_url(url: comp.InputPath(str)):
 
 
 # Link to your container image
-base_img = ""  # Change to your registry's URI
+base_img = "ultralytics/yolov5:latest"  # Change to your registry's URI
 
 # Create first OP
 make_inf = kfp.components.create_component_from_func(inf, base_image=base_img)
@@ -52,3 +50,4 @@ def inf_upload(image_path):
 
     # Call the second OP and pass the first task's outputs
     second_task = do_print(first_task.outputs['output_string'])
+
