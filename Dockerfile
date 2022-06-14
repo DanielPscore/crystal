@@ -1,11 +1,7 @@
-FROM python:3.8-slim-buster
-
+FROM orgoro/dlib-opencv-python:latest
+COPY .  /crystal
 WORKDIR /crystal
-
-
-COPY requirements.txt requirements.txt
-RUN pip3 install -r requirements.txt
-
-COPY . .
-
-CMD [ "python3", "-m" , "flask", "run", "--host=0.0.0.0"]
+RUN apt-get upgrade && apt-get update
+RUN python -m pip install --upgrade pip
+RUN pip install -r requirements.txt
+CMD python test.py

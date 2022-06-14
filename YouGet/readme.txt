@@ -1,0 +1,1 @@
+simpy use the YouGet.download(link, path_to_save-file) download function to download files from google drive and youtube
