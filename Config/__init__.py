@@ -1,11 +1,11 @@
 import os
 pwd = os.getcwd()
 i = pwd.find("crystal")
-pwd = pwd[:i+len("SonalysisAI-V2")]
+pwd = pwd[:i+len("crystal")]
 print(pwd)
 class Configurations:
     def __init__(self):
-        self.MONGODB_URI = "mongodb://sonauser:sona15230@api.sonalysis.io:27017/sonalysis?authSource=admin&directConnection=true&ssl=false"
+        self.MONGODB_URI = "*******"
         self.kafkaconsumer = "NewUpload"
         self.kafkaproducer = "Kubeflow"
         self.brokers = ['137.184.147.128:9092']
